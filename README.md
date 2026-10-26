@@ -2,8 +2,8 @@
 
 ## New interactive views
 
-- **Life Calendar** — enter a date of birth and a target age (1–120 years). Every dot is one week; the current week is highlighted.
-- **Yearly Calendar** — a 52-dot year overview with the current week highlighted when the selected year is the current year.
+- **Life Calendar** — enter a date of birth and a target age (1–120 years). The URL image renderer supports `unit=weeks` (default) or `unit=days`; the current week/day is highlighted when it falls inside the displayed lifespan.
+- **Yearly Calendar** — choose `unit=weeks` (52 dots) or `unit=days` (365 or 366 dots, depending on leap year). The current week/day is highlighted when rendering the current year.
 - **Goal Calendar** — add as many named target dates as needed. Each goal displays its countdown plus a live dot-calendar preview. Choose **Days** (one dot for every calendar day, including today and the target date) or **Weeks** (rolling seven-day blocks anchored to today/target). If today and the target occupy the same weekly block—or the target is today—the renderer uses one dot with both markers instead of drawing duplicate highlights. Goals and the preferred dot unit are stored in this browser.
 - **Timeline** — the original event/milestone calendar remains available, including its existing import/export, sharing, and wallpaper features.
 
@@ -50,7 +50,7 @@ Use `unit=days` for one dot per day or `unit=weeks` for rolling seven-day blocks
 | `age` or `targetAge` | Target lifespan in years | `90` |
 | `year` | Year to render | current year |
 | `goal` or `goalTitle` | Goal name | `Finish my fellowship` |
-| `unit`, `dotUnit`, `dotsAs`, or `granularity` | Goal-dot granularity | `days` (default) or `weeks` |
+| `unit`, `dotUnit`, `dotsAs`, or `granularity` | Dot unit for Life, Yearly, or Goal image | `weeks` (default for Life/Yearly), `days` (default for Goal) |
 | `date` or `targetDate` | Goal target date | `2027-06-30` (required for goal images) |
 | `title` | Custom heading; an empty `title=` hides it | Age defaults to no heading; yearly defaults to the year; goal defaults to the goal name |
 | `caption` | Custom caption below the dots; an empty `caption=` hides it | Age defaults to percentage of target age; yearly to current week or year; goal to countdown and target date |
@@ -60,7 +60,33 @@ Use `unit=days` for one dot per day or `unit=weeks` for rolling seven-day blocks
 | `futureColor` | Color for future weeks | `%2344403c` |
 | `currentColor` | Highlight today/current week | `%23ef4444` |
 | `goalColor` | Highlight the target-date dot in a goal image | `%23f59e0b` |
+| `maxDotsPerRow` | Maximum number of dots on each row (last row may be shorter) | Mode-dependent default; integer `1`–`2000` |
+| `rowAlign` or `alignment` | Align each row of dots | `left`, `center` (default), `right` |
+| `hideGoalName=1` | Hide the default Goal Calendar title | `1`; a custom `title=` takes precedence |
+| `hideTitle=1` or `showTitle=0` | Hide the heading for any calendar | `1` / `0` |
+| `hideCaption=1` or `showCaption=0` | Hide the caption below the dots | `1` / `0` |
+| `paddingTop`, `paddingRight`, `paddingBottom`, `paddingLeft` | Set independent padding on each side as a percentage of canvas height (top/bottom) or width (left/right) | `0`–`40`; default `0` |
+| `padding` | Set the same percentage padding on every side unless overridden by side-specific parameters | `0`–`40`; default `0` |
+| `dotSize`, `circleSize`, or `size` | Dot diameter preset | `smaller`, `default`, `larger` |
 | `download` | Automatically prompt a JPG download | `1` |
+
+Example: life in days with a chosen row width, alignment, padding, and smaller dots:
+
+```text
+/life?birthday=2000-04-23&age=90&unit=days&maxDotsPerRow=140&rowAlign=center&paddingTop=8&paddingRight=5&paddingBottom=8&paddingLeft=5&dotSize=smaller&width=1179&height=2556
+```
+
+Example: yearly daily view with left-aligned rows:
+
+```text
+/yearly?year=2026&unit=days&maxDotsPerRow=31&rowAlign=left&dotSize=default
+```
+
+Example: goal image without the goal name and caption:
+
+```text
+/goal?goal=Finish%20fellowship&date=2027-06-30&hideGoalName=1&hideCaption=1
+```
 
 For example, a customized life calendar:
 

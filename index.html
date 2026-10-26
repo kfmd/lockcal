@@ -1173,17 +1173,48 @@ function imageRouteConfig(){
   const year = clampInt(params.get("year"),1900,2200,currentYear);
   const goalName = firstParam(params,["goalTitle","goal","target","name"]) || "Goal Calendar";
   const goalDate = firstParam(params,["date","targetDate","target_date","goalDate"]);
-  const rawUnit = String(firstParam(params,["unit","dotUnit","dotsAs","granularity"]) || "days").toLowerCase();
+  const rawUnit = String(firstParam(params,["unit","dotUnit","dotsAs","granularity"]) || (mode === "goal" ? "days" : "weeks")).toLowerCase();
   const dotUnit = ["week","weeks"].includes(rawUnit) ? "weeks" : "days";
   const width = clampInt(params.get("width"),240,4096,1179);
   const height = clampInt(params.get("height"),240,4096,2556);
   let w = width, h = height;
   if (w*h > 16000000){ const factor = Math.sqrt(16000000/(w*h)); w = Math.max(240,Math.floor(w*factor)); h = Math.max(240,Math.floor(h*factor)); }
+
+  const boolParam = (names, fallback=false) => {
+    const rawValue = firstParam(params,names);
+    if (rawValue === null) return fallback;
+    return ["1","true","yes","on"].includes(String(rawValue).trim().toLowerCase());
+  };
+  const percentParam = (names, fallback=0) => {
+    const rawValue = firstParam(params,names);
+    if (rawValue === null || String(rawValue).trim() === "") return fallback;
+    const numericText = String(rawValue).trim().replace(/%$/, "");
+    const n = Number(numericText);
+    return Number.isFinite(n) ? Math.max(0,Math.min(40,n)) : fallback;
+  };
+  const basePadding = percentParam(["padding"],0);
+  const topPadding = percentParam(["paddingTop","padTop","topPadding","top","pt"],basePadding);
+  const rightPadding = percentParam(["paddingRight","padRight","rightPadding","right","pr"],basePadding);
+  const bottomPadding = percentParam(["paddingBottom","padBottom","bottomPadding","bottom","pb"],basePadding);
+  const leftPadding = percentParam(["paddingLeft","padLeft","leftPadding","left","pl"],basePadding);
+  const rawDotSize = String(firstParam(params,["dotSize","dot_size","dotsSize","circleSize","circle_size","size"]) || "default").toLowerCase();
+  const dotSize = ["small","smaller","s"].includes(rawDotSize) ? "smaller" : ["large","larger","l"].includes(rawDotSize) ? "larger" : "default";
+  const alignmentRaw = String(firstParam(params,["rowAlign","rowAlignment","alignment","align"]) || "center").toLowerCase();
+  const rowAlign = ["left","right","center"].includes(alignmentRaw) ? alignmentRaw : "center";
+  const maxDotsRaw = firstParam(params,["maxDotsPerRow","maxPerRow","max_dots_per_row","dotsPerRow","perRow","maxCols","cols"]);
+  const maxDotsPerRow = maxDotsRaw === null || String(maxDotsRaw).trim()==="" ? null : clampInt(maxDotsRaw,1,2000,null);
+  const hideTitle = boolParam(["hideTitle","hide_title"],false) || (params.has("showTitle") && !boolParam(["showTitle"],true));
+  const hideCaption = boolParam(["hideCaption","hide_caption","hideCaptionName","hide_caption_name"],false) || (params.has("showCaption") && !boolParam(["showCaption"],true));
+  const hideGoalName = boolParam(["hideGoalName","hide_goal_name","hideGoalTitle","hide_goal_title"],false) || (params.has("showGoalName") && !boolParam(["showGoalName"],true));
+  const title = params.has("title") ? params.get("title") : (mode === "yearly" ? String(year) : mode === "goal" ? goalName : "");
+  const showTitle = !hideTitle && !(mode === "goal" && hideGoalName && !params.has("title")) && title !== "";
+  const caption = params.has("caption") ? params.get("caption") : null;
+
   return {
     mode, params, birthday, age, year, goalName, goalDate, dotUnit,
-    width:w, height:h,
-    title:params.has("title") ? params.get("title") : (mode === "yearly" ? String(year) : mode === "goal" ? goalName : ""),
-    caption:params.has("caption") ? params.get("caption") : null,
+    width:w, height:h, maxDotsPerRow, rowAlign, dotSize,
+    paddingTop:topPadding, paddingRight:rightPadding, paddingBottom:bottomPadding, paddingLeft:leftPadding,
+    title, showTitle, hideGoalName, caption, showCaption:!hideCaption && caption !== "",
     bg:validHex(firstParam(params,["bg","background","backgroundColor","background_color"]),"#0c0a09"),
     dot:validHex(firstParam(params,["dot","dots","dotColor","dotsColor","dot_color"]),"#f5f5f4"),
     future:validHex(firstParam(params,["future","futureColor","future_color"]),"#44403c"),
@@ -1200,96 +1231,109 @@ function drawStandaloneCalendar(cfg){
   if (!ctx) throw new Error("Canvas is not supported by this browser.");
   ctx.fillStyle = cfg.bg; ctx.fillRect(0,0,W,H);
   const scale = W/1179;
-  const font = (px, weight=500) => `${Math.max(10,Math.round(px*scale))}px system-ui,-apple-system,"Segoe UI",sans-serif`;
+  const left = W*cfg.paddingLeft/100, right = W*(1-cfg.paddingRight/100);
+  const top = H*cfg.paddingTop/100, bottom = H*(1-cfg.paddingBottom/100);
+  const contentW = Math.max(1,right-left), contentH = Math.max(1,bottom-top);
+  const centerX = left+contentW/2;
   const titleSize = Math.max(16, W*0.034);
   const captionSize = Math.max(12, W*0.019);
+  let caption = cfg.caption;
   const drawCentered = (text, y, size, color, weight=500) => {
     if (!text) return;
     ctx.fillStyle=color; ctx.font=`${weight} ${Math.round(size)}px system-ui,-apple-system,"Segoe UI",sans-serif`;
-    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(String(text),W/2,y,W*0.88);
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(String(text),centerX,y,contentW*0.96);
   };
-  let caption = cfg.caption;
-  if (cfg.mode === "age"){
-    if (!isISO(cfg.birthday)) throw new Error("Life calendar image needs birthday=YYYY-MM-DD. Example: ?calendar=age&birthday=2000-04-23&age=90");
-    const birth = birthParts(cfg.birthday), now = today();
-    const total = cfg.age * WEEKS;
-    const current = now < dn(cfg.birthday) ? -1 : cellOf(now,birth).index;
-    const lived = Math.max(0,Math.min(total,current+1));
-    if (caption === null) caption = `${(lived/total*100).toFixed(1)}% to ${cfg.age}`;
-    if (cfg.title) drawCentered(cfg.title,H*0.145,titleSize,cfg.dot,700);
-    const pitchX = Math.min(W*0.84/52,H*0.62/cfg.age);
-    const pitchY = Math.max(pitchX,H*0.62/cfg.age);
-    const d = Math.max(1.5,pitchX*0.58), gridH=(cfg.age-1)*pitchY+d;
-    const x0=(W-(51*pitchX+d))/2;
-    const gridAreaTop=H*0.20, gridAreaHeight=H*0.64;
-    const y0=gridAreaTop+Math.max(0,(gridAreaHeight-gridH)/2);
-    for (let age=0; age<cfg.age; age++){
-      for (let week=0; week<WEEKS; week++){
-        const i=age*WEEKS+week;
-        ctx.fillStyle = i===current ? cfg.current : i<current ? cfg.dot : cfg.future;
-        ctx.beginPath(); ctx.arc(x0+week*pitchX+d/2,y0+age*pitchY+d/2,d/2,0,Math.PI*2); ctx.fill();
-      }
-    }
-    drawCentered(caption,Math.min(H*0.94,y0+gridH+H*0.055),captionSize,"#a8a29e",400);
-    return canvas;
-  }
-  if (cfg.mode === "yearly"){
-    const year = cfg.year;
-    const now=iso(today()), currentYear=new Date(today()*DAY).getUTCFullYear();
-    const highlight = year===currentYear ? weekIndexInYear(now,year) : -1;
-    if (caption===null) caption = highlight>=0 ? `Week ${highlight+1} of 52` : String(year);
-    if (cfg.title) drawCentered(cfg.title,H*0.27,titleSize,cfg.dot,700);
-    const pitch=Math.min(W*0.78/13,H*0.28/4), d=Math.max(3,pitch*0.56);
-    const gridW=12*pitch+d, gridH=3*pitch+d, x0=(W-gridW)/2, y0=(H-gridH)/2;
-    for (let i=0;i<WEEKS;i++){
-      const past = year < currentYear || (year===currentYear && i<highlight);
-      let color = past ? cfg.dot : cfg.future;
-      if (i===highlight && highlight>=0) color=cfg.current;
-      const x=x0+(i%13)*pitch+d/2, y=y0+Math.floor(i/13)*pitch+d/2;
-      ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,d/2,0,Math.PI*2); ctx.fill();
-    }
-    drawCentered(caption,H*0.76,captionSize,"#a8a29e",400);
-    return canvas;
-  }
-  if (cfg.mode === "goal"){
-    if (!isISO(cfg.goalDate)) throw new Error("Goal image needs date=YYYY-MM-DD. Example: ?calendar=goal&goal=My%20Goal&date=2027-01-01&unit=days");
-    const model = goalCalendarModel(cfg.goalDate, cfg.dotUnit, today());
-    const unitLabel = model.count === 1 ? (cfg.dotUnit === "weeks" ? "week dot" : "day dot") : (cfg.dotUnit === "weeks" ? "week dots" : "day dots");
-    if (caption===null) caption = `${countdownText(model.diff)} · ${prettyDate(cfg.goalDate)} · ${model.count.toLocaleString()} ${unitLabel}`;
-    if (cfg.title) drawCentered(cfg.title,H*0.16,titleSize,cfg.dot,700);
-
-    // The goal interval starts at today for a future target, or at the target for a past goal.
-    // It uses one continuous interval, so a short countdown can never create a duplicate "current" dot.
-    const maxCols = cfg.dotUnit === "weeks" ? 13 : 20;
-    const cols = Math.min(model.count, maxCols);
-    const rows = Math.ceil(model.count / maxCols);
-    const gridAreaTop = H*0.28, gridAreaHeight = H*0.43;
-    const pitch = Math.max(1.5, Math.min(W*0.84/maxCols, gridAreaHeight/Math.max(1,rows), 44*scale));
-    const d = Math.max(1, Math.min(24*scale, pitch*0.62));
-    const gridHeight = (rows-1)*pitch+d;
-    const y0 = gridAreaTop + Math.max(0,(gridAreaHeight-gridHeight)/2);
-    for (let i=0; i<model.count; i++){
-      const row = Math.floor(i/maxCols);
-      const col = i % maxCols;
-      const rowDots = Math.min(maxCols, model.count-row*maxCols);
-      const rowWidth = (rowDots-1)*pitch+d;
-      const x = (W-rowWidth)/2 + col*pitch+d/2;
-      const y = y0 + row*pitch+d/2;
-      const isCurrent = i === model.currentIndex;
-      const isTarget = i === model.targetIndex;
-      let color = model.diff < 0 ? cfg.dot : cfg.future;
-      if (isCurrent) color=cfg.current;
-      if (isTarget) color=cfg.goal;
-      ctx.fillStyle=color;
+  const drawTitle = () => { if (cfg.showTitle && cfg.title) drawCentered(cfg.title,top+contentH*0.055,titleSize,cfg.dot,700); };
+  const gridTop = top + contentH*(cfg.showTitle && cfg.title ? 0.14 : 0.035);
+  const gridBottom = bottom - contentH*(cfg.showCaption ? 0.14 : 0.035);
+  const gridAvailH = Math.max(1,gridBottom-gridTop);
+  const gridCenterY = gridTop+gridAvailH/2;
+  const chooseColumns = (total, defaultColumns) => {
+    const n = cfg.maxDotsPerRow === null ? defaultColumns : cfg.maxDotsPerRow;
+    return Math.max(1,Math.min(total,n));
+  };
+  const adaptiveColumns = (total, max=2000) => Math.max(1,Math.min(max,Math.round(Math.sqrt(total*contentW/gridAvailH))));
+  const drawGrid = (total, getColor, defaultColumns, maxPitch=44*scale, getRing=null) => {
+    const cols = chooseColumns(total,defaultColumns);
+    const rows = Math.ceil(total/cols);
+    const pitch = Math.min(contentW/cols,gridAvailH/Math.max(1,rows),maxPitch);
+    const dotFactor = cfg.dotSize === "smaller" ? 0.65 : cfg.dotSize === "larger" ? 1.35 : 1;
+    const d = Math.min(pitch*0.62*dotFactor,pitch*0.88);
+    const gridH = (rows-1)*pitch+d;
+    const y0 = gridCenterY-gridH/2;
+    for(let i=0;i<total;i++){
+      const row=Math.floor(i/cols), col=i%cols;
+      const rowDots=Math.min(cols,total-row*cols);
+      const rowWidth=(rowDots-1)*pitch+d;
+      let rowX=left;
+      if(cfg.rowAlign==="center") rowX=left+(contentW-rowWidth)/2;
+      else if(cfg.rowAlign==="right") rowX=right-rowWidth;
+      const x=rowX+col*pitch+d/2, y=y0+row*pitch+d/2;
+      ctx.fillStyle=getColor(i);
       ctx.beginPath(); ctx.arc(x,y,d/2,0,Math.PI*2); ctx.fill();
-      // When today and target are the same day/week, render ONE goal-colored dot with a current-color ring.
-      if (isCurrent && isTarget){
-        ctx.strokeStyle=cfg.current;
-        ctx.lineWidth=Math.max(1,Math.min(3*scale,d*0.16));
+      const ring=getRing ? getRing(i) : null;
+      if(ring){
+        ctx.strokeStyle=ring; ctx.lineWidth=Math.max(0.7,Math.min(3*scale,d*0.18));
         ctx.beginPath(); ctx.arc(x,y,d/2+ctx.lineWidth*1.25,0,Math.PI*2); ctx.stroke();
       }
     }
-    drawCentered(caption,H*0.79,captionSize,"#a8a29e",400);
+  };
+
+  if (cfg.mode === "age"){
+    if (!isISO(cfg.birthday)) throw new Error("Life calendar image needs birthday=YYYY-MM-DD. Example: ?calendar=age&birthday=2000-04-23&age=90");
+    const birthDay=dn(cfg.birthday), birth=birthParts(cfg.birthday), now=today();
+    let total, currentIndex;
+    if(cfg.dotUnit === "days"){
+      total=Math.max(1,anniv(birth,cfg.age)-birthDay);
+      currentIndex=now<birthDay ? -1 : now-birthDay;
+    } else {
+      total=cfg.age*WEEKS;
+      currentIndex=now<birthDay ? -1 : cellOf(now,birth).index;
+    }
+    currentIndex=currentIndex<0 ? -1 : currentIndex;
+    const lived=Math.max(0,Math.min(total,currentIndex+1));
+    if(caption===null) caption=`${(lived/total*100).toFixed(1)}% to ${cfg.age}`;
+    drawTitle();
+    const defaultCols=cfg.maxDotsPerRow===null ? (cfg.dotUnit==="days" ? adaptiveColumns(total,2000) : WEEKS) : cfg.maxDotsPerRow;
+    drawGrid(total,i=>i===currentIndex ? cfg.current : i<currentIndex ? cfg.dot : cfg.future,defaultCols,72*scale);
+    if(cfg.showCaption) drawCentered(caption,bottom-contentH*0.045,captionSize,"#a8a29e",400);
+    return canvas;
+  }
+
+  if (cfg.mode === "yearly"){
+    const year=cfg.year, yearStart=dn(`${year}-01-01`), yearEnd=dn(`${year+1}-01-01`);
+    const total=cfg.dotUnit==="days" ? yearEnd-yearStart : WEEKS;
+    const now=today(), currentYear=new Date(now*DAY).getUTCFullYear();
+    const currentIndex=year!==currentYear ? -1 : cfg.dotUnit==="days" ? now-yearStart : weekIndexInYear(iso(now),year);
+    if(caption===null) caption=cfg.dotUnit==="days" ? (currentIndex>=0 ? `Day ${currentIndex+1} of ${total}` : String(year)) : (currentIndex>=0 ? `Week ${currentIndex+1} of 52` : String(year));
+    drawTitle();
+    const defaultCols=cfg.maxDotsPerRow===null ? (cfg.dotUnit==="days" ? adaptiveColumns(total,2000) : 13) : cfg.maxDotsPerRow;
+    const colorFor=i=>{
+      if(i===currentIndex && currentIndex>=0) return cfg.current;
+      const past=year<currentYear || (year===currentYear && i<currentIndex);
+      return past ? cfg.dot : cfg.future;
+    };
+    drawGrid(total,colorFor,defaultCols,72*scale);
+    if(cfg.showCaption) drawCentered(caption,bottom-contentH*0.045,captionSize,"#a8a29e",400);
+    return canvas;
+  }
+
+  if (cfg.mode === "goal"){
+    if (!isISO(cfg.goalDate)) throw new Error("Goal image needs date=YYYY-MM-DD. Example: ?calendar=goal&goal=My%20Goal&date=2027-01-01&unit=days");
+    const model=goalCalendarModel(cfg.goalDate,cfg.dotUnit,today());
+    const unitLabel=model.count===1 ? (cfg.dotUnit==="weeks" ? "week dot" : "day dot") : (cfg.dotUnit==="weeks" ? "week dots" : "day dots");
+    if(caption===null) caption=`${countdownText(model.diff)} · ${prettyDate(cfg.goalDate)} · ${model.count.toLocaleString()} ${unitLabel}`;
+    drawTitle();
+    const defaultCols=cfg.maxDotsPerRow===null ? (cfg.dotUnit==="weeks" ? 13 : 20) : cfg.maxDotsPerRow;
+    const colorFor=i=>{
+      const isCurrent=i===model.currentIndex, isTarget=i===model.targetIndex;
+      if(isTarget) return cfg.goal;
+      if(isCurrent) return cfg.current;
+      return model.diff<0 ? cfg.dot : cfg.future;
+    };
+    const ringFor=i => i===model.currentIndex && i===model.targetIndex ? cfg.current : null;
+    drawGrid(model.count,colorFor,defaultCols,44*scale,ringFor);
+    if(cfg.showCaption) drawCentered(caption,bottom-contentH*0.045,captionSize,"#a8a29e",400);
     return canvas;
   }
   throw new Error("Unknown calendar type. Use calendar=age, calendar=yearly, or calendar=goal.");
@@ -1317,7 +1361,7 @@ function renderStandaloneImage(cfg){
       if(cfg.autoDownload){ setTimeout(()=>download.click(),150); }
     },"image/jpeg",0.96);
   } catch(err){
-    wrap.innerHTML=`<div style="max-width:680px;padding:24px;line-height:1.6"><h1 style="font-size:24px">Cannot generate calendar image</h1><p>${esc(err.message||String(err))}</p><p>Parameters supported: <code>calendar=age|yearly|goal</code>, <code>unit=days|weeks</code> for goals, <code>width</code>, <code>height</code>, <code>title</code>, <code>caption</code>, <code>bg</code>, and <code>dot</code>.</p></div>`;
+    wrap.innerHTML=`<div style="max-width:680px;padding:24px;line-height:1.6"><h1 style="font-size:24px">Cannot generate calendar image</h1><p>${esc(err.message||String(err))}</p><p>Parameters supported: <code>calendar=age|yearly|goal</code>, <code>unit=days|weeks</code>, <code>maxDotsPerRow</code>, <code>rowAlign=left|center|right</code>, <code>hideGoalName=1</code>, <code>hideCaption=1</code>, <code>paddingTop</code>, <code>paddingRight</code>, <code>paddingBottom</code>, <code>paddingLeft</code>, and <code>dotSize=smaller|default|larger</code>.</p></div>`;
   }
 }
 
