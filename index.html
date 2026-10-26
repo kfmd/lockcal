@@ -1353,12 +1353,10 @@ function renderStandaloneImage(cfg){
       img.alt=cfg.title || "Generated calendar JPEG";
       img.style.cssText=`display:block;width:min(100vw,${cfg.width}px);height:auto;max-width:100%;margin:0 auto`;
       img.src=url;
-      const download=document.createElement("a");
-      download.href=url; download.download=`${cfg.mode}-calendar-${cfg.mode==="yearly"?cfg.year:cfg.mode==="goal"?(cfg.goalDate||""):cfg.birthday||"life"}.jpg`;
-      download.textContent="Download JPG";
-      download.style.cssText="position:fixed;right:12px;top:12px;z-index:2;padding:9px 12px;border-radius:999px;background:rgba(28,25,23,.84);color:#fff;text-decoration:none;font:600 12px system-ui,sans-serif;border:1px solid rgba(255,255,255,.22)";
-      wrap.replaceChildren(img,download);
-      if(cfg.autoDownload){ setTimeout(()=>download.click(),150); }
+      // This legacy in-page preview is only a visual fallback. Automation clients
+      // must use the server endpoint (/api/calendar or the /life, /yearly, /goal
+      // aliases), which returns the raw image/jpeg response body with no HTML.
+      wrap.replaceChildren(img);
     },"image/jpeg",0.96);
   } catch(err){
     wrap.innerHTML=`<div style="max-width:680px;padding:24px;line-height:1.6"><h1 style="font-size:24px">Cannot generate calendar image</h1><p>${esc(err.message||String(err))}</p><p>Parameters supported: <code>calendar=age|yearly|goal</code>, <code>unit=days|weeks</code>, <code>maxDotsPerRow</code>, <code>rowAlign=left|center|right</code>, <code>hideGoalName=1</code>, <code>hideCaption=1</code>, <code>paddingTop</code>, <code>paddingRight</code>, <code>paddingBottom</code>, <code>paddingLeft</code>, and <code>dotSize=smaller|default|larger</code>.</p></div>`;

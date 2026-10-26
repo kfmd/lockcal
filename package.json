@@ -1,0 +1,15 @@
+{
+  "name": "life-calendar-jpeg-endpoint",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Life Calendar static app with a server-rendered raw JPEG endpoint for automation clients.",
+  "engines": {
+    "node": "22.x"
+  },
+  "dependencies": {
+    "sharp": "0.35.5"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

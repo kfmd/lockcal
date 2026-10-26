@@ -1,10 +1,11 @@
 {
   "rewrites": [
-    { "source": "/life", "destination": "/index.html" },
-    { "source": "/age", "destination": "/index.html" },
-    { "source": "/year", "destination": "/index.html" },
-    { "source": "/yearly", "destination": "/index.html" },
-    { "source": "/goal", "destination": "/index.html" },
-    { "source": "/goals", "destination": "/index.html" }
+    { "source": "/image", "destination": "/api/calendar" },
+    { "source": "/life", "destination": "/api/calendar?__route=age" },
+    { "source": "/age", "destination": "/api/calendar?__route=age" },
+    { "source": "/year", "destination": "/api/calendar?__route=yearly" },
+    { "source": "/yearly", "destination": "/api/calendar?__route=yearly" },
+    { "source": "/goal", "destination": "/api/calendar?__route=goal" },
+    { "source": "/goals", "destination": "/api/calendar?__route=goal" }
   ]
 }
