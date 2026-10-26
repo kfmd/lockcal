@@ -1,6 +1,6 @@
 {
   "name": "life-calendar-jpeg-endpoint",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "private": true,
   "description": "Life Calendar static app with raw JPEG output and bundled server-side font rendering.",
   "engines": {
@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "sharp": "0.35.5",
-    "roboto-npm-webfont": "0.0.3"
+    "roboto-npm-webfont": "0.0.3",
+    "fontkit": "2.0.4"
   },
   "scripts": {
     "start": "node server.js"

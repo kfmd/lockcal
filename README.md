@@ -83,8 +83,9 @@ This update makes font selection deterministic:
 2. `api/calendar.js` configures a Fontconfig file in the writable temporary directory **before requiring `sharp`**.
 3. The SVG explicitly requests `Roboto` instead of platform-dependent `Arial`/`Helvetica` fallbacks.
 4. `vercel.json` includes the dependency's font directory in the serverless function bundle so the font files are available at runtime.
+5. Dot separators in generated captions (for example, `In 65 days · Dec 31, 2026 · 66 day dots`) are drawn as SVG circles rather than Unicode font glyphs, preventing missing-glyph squares. The separator circles are slightly larger, and the renderer uses `fontkit` to measure each caption segment with the same bundled Roboto TrueType font used for output. Each separator is placed at the exact midpoint of an equal-width spacing slot, and the complete caption line is centered using the measured widths rather than an approximate characters-per-pixel estimate. This keeps the dots centered between the text groups across local and Vercel rendering.
 
-No manual font installation or Vercel system-package configuration is needed. Deploy the updated `package.json`, `api/calendar.js`, and `vercel.json` together. If a `package-lock.json` exists in your repository, regenerate it with `npm install` and commit it so the pinned dependency is included reproducibly.
+No manual font installation or Vercel system-package configuration is needed. Deploy the updated `package.json` (including `fontkit`), `api/calendar.js`, and `vercel.json` together. If a `package-lock.json` exists in your repository, regenerate it with `npm install` and commit it so the pinned dependency is included reproducibly.
 
 ## URL parameters
 

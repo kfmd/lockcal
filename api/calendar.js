@@ -46,10 +46,39 @@ function configureBundledFontconfig() {
   ].join('\n'));
   process.env.FONTCONFIG_FILE = configFile;
   process.env.FONTCONFIG_PATH = configDir;
+  return fontDir;
 }
 
-configureBundledFontconfig();
+const BUNDLED_FONT_DIR = configureBundledFontconfig();
 const sharp = require('sharp');
+const fontkit = require('fontkit');
+
+// Use the same bundled Roboto font files to calculate exact caption text widths.
+// This prevents the SVG separator circles drifting when proportional character
+// width guesses differ from the actual rendered words.
+const bundledFontNames = fs.readdirSync(BUNDLED_FONT_DIR);
+function findFontFile(candidates) {
+  for (const candidate of candidates) {
+    const found = bundledFontNames.find(name => name.toLowerCase() === candidate.toLowerCase());
+    if (found) return path.join(BUNDLED_FONT_DIR, found);
+  }
+  return null;
+}
+const regularFontPath = findFontFile(['roboto.ttf', 'roboto-regular.ttf']);
+const mediumFontPath = findFontFile(['robotomedium.ttf', 'roboto-medium.ttf']) || regularFontPath;
+const boldFontPath = findFontFile(['robotobold.ttf', 'roboto-bold.ttf']) || mediumFontPath || regularFontPath;
+if (!regularFontPath) throw new Error('Roboto TTF is missing from the bundled font package.');
+const fontMetricsCache = new Map();
+function metricFont(weight = 400) {
+  const fontPath = weight >= 650 ? boldFontPath : weight >= 500 ? mediumFontPath : regularFontPath;
+  if (!fontMetricsCache.has(fontPath)) fontMetricsCache.set(fontPath, fontkit.openSync(fontPath));
+  return fontMetricsCache.get(fontPath);
+}
+function measureText(text, fontSize, weight = 400) {
+  const font = metricFont(weight);
+  const run = font.layout(String(text));
+  return run.advanceWidth * fontSize / font.unitsPerEm;
+}
 
 const DAY_MS = 86400000;
 const WEEKS = 52;
@@ -209,8 +238,13 @@ function buildSvg(cfg) {
     if (separatorPattern.test(valueText)) {
       const segments = valueText.split(/[·⋅•∙]/u).map(part => part.trim());
       const separatorCount = segments.length - 1;
-      const separatorSlot = Math.max(fontSize * 0.72, 8);
-      const rawWidths = segments.map(part => Math.max(fontSize * 0.12, [...part].length * fontSize * 0.54));
+      // Keep equal whitespace slots around each separator and calculate each
+      // text run's width from the actual bundled Roboto font instead of a
+      // character-count estimate. Text and dot centers therefore share the
+      // same precise horizontal layout. A slightly larger radius keeps the
+      // separators legible at phone-wallpaper resolution.
+      const separatorSlot = Math.max(fontSize * 0.88, 10 * scale);
+      const rawWidths = segments.map(part => Math.max(fontSize * 0.12, measureText(part, fontSize, weight)));
       const rawTotal = rawWidths.reduce((sum, width) => sum + width, 0) + separatorCount * separatorSlot;
       const maxTotal = Math.max(1, contentW * 0.96);
       const fitScale = rawTotal > maxTotal ? maxTotal / rawTotal : 1;
@@ -218,7 +252,7 @@ function buildSvg(cfg) {
       const slot = separatorSlot * fitScale;
       const totalWidth = widths.reduce((sum, width) => sum + width, 0) + separatorCount * slot;
       let cursor = centerX - totalWidth / 2;
-      const radius = Math.max(1.3, Math.min(fontSize * 0.085, 2.5 * scale)) * fitScale;
+      const radius = Math.max(1.8, Math.min(fontSize * 0.11, 3 * scale)) * fitScale;
 
       segments.forEach((part, index) => {
         const width = widths[index];
