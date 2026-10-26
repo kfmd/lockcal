@@ -1,102 +1,165 @@
-# Life in Weeks — added calendar views and URL-generated JPGs
+# Life in Weeks — raw JPEG output for automation
 
-## New interactive views
+## Raw JPEG URLs (for Vercel, MacroDroid, and automation tools)
 
-- **Life Calendar** — enter a date of birth and a target age (1–120 years). The URL image renderer supports `unit=weeks` (default) or `unit=days`; the current week/day is highlighted when it falls inside the displayed lifespan.
-- **Yearly Calendar** — choose `unit=weeks` (52 dots) or `unit=days` (365 or 366 dots, depending on leap year). The current week/day is highlighted when rendering the current year.
-- **Goal Calendar** — add as many named target dates as needed. Each goal displays its countdown plus a live dot-calendar preview. Choose **Days** (one dot for every calendar day, including today and the target date) or **Weeks** (rolling seven-day blocks anchored to today/target). If today and the target occupy the same weekly block—or the target is today—the renderer uses one dot with both markers instead of drawing duplicate highlights. Goals and the preferred dot unit are stored in this browser.
-- **Timeline** — the original event/milestone calendar remains available, including its existing import/export, sharing, and wallpaper features.
+Use the image endpoint, not an HTML page. This version generates the image on the server and responds with the actual JPEG byte stream:
 
-The selected view, Life Calendar inputs, and goal list are saved in this browser. The existing timeline data format and save key are preserved.
+- `Content-Type: image/jpeg`
+- `Content-Disposition: attachment; filename="...jpg"`
+- No HTML wrapper, image preview, JavaScript, or download button in the response body
+- `Cache-Control: no-store` so current-day highlighting does not become stale
 
-## URL-generated JPEGs
+Replace `YOURDOMAIN` with your Vercel domain. These examples all return the **raw JPEG response** and are suitable for HTTP download actions that save the response body directly as a `.jpg` file.
 
-The image mode runs entirely in the browser. It draws a canvas at the requested dimensions, converts it to JPEG, displays it, and offers a **Download JPG** link. Add `download=1` to trigger a download as well as display it.
+### 1. Life / Age calendar
 
-Hex colors must be URL-encoded (write `#` as `%23`). If a parameter is omitted, the defaults shown below are used.
-
-### Life / age calendar
+Daily dots for a lifespan of 90 years:
 
 ```text
-/life?birthday=2000-04-23&age=90&height=2556&width=1179
+https://YOURDOMAIN/api/calendar?calendar=age&birthday=2000-04-23&age=90&unit=days&width=1179&height=2556
 ```
 
-You can also use `/age?...`, or the host's root URL with `?calendar=age&birthday=2000-04-23&age=90`.
-
-### Yearly calendar
+The same request using the shorter path:
 
 ```text
-/yearly?year=2026&width=1179&height=2556&title=My%20Year&caption=One%20week%20at%20a%20time
+https://YOURDOMAIN/life?birthday=2000-04-23&age=90&unit=days&width=1179&height=2556
 ```
 
-### Goal calendar
+Weekly dots instead:
 
 ```text
-/goal?goal=Finish%20my%20fellowship&date=2027-06-30&unit=days&width=1179&height=2556
+https://YOURDOMAIN/api/calendar?calendar=age&birthday=2000-04-23&age=90&unit=weeks&width=1179&height=2556
 ```
 
-Use `unit=days` for one dot per day or `unit=weeks` for rolling seven-day blocks. Day mode counts both endpoints, so the target `2026-10-30` viewed on `2026-10-26` produces exactly five dots (October 26 through October 30). If today and the target fall into the same weekly block—or the target is today—the renderer uses one dot with both markers rather than duplicating the current highlight.
+### 2. Year / Yearly calendar
+
+Daily dots for 2026 (366 dots for leap years, 365 otherwise):
 
 ```text
-/goal?goal=Finish%20my%20fellowship&date=2027-06-30&unit=weeks&width=1179&height=2556
+https://YOURDOMAIN/api/calendar?calendar=yearly&year=2026&unit=days&width=1179&height=2556
 ```
 
-### Supported parameters
+The same request using the shorter path:
+
+```text
+https://YOURDOMAIN/yearly?year=2026&unit=days&width=1179&height=2556
+```
+
+Weekly dots instead:
+
+```text
+https://YOURDOMAIN/api/calendar?calendar=yearly&year=2026&unit=weeks&width=1179&height=2556
+```
+
+### 3. Goal calendar
+
+Daily dots from today through the target date, inclusive:
+
+```text
+https://YOURDOMAIN/api/calendar?calendar=goal&goal=Finish%20fellowship&date=2027-06-30&unit=days&width=1179&height=2556
+```
+
+The same request using the shorter path:
+
+```text
+https://YOURDOMAIN/goal?goal=Finish%20fellowship&date=2027-06-30&unit=days&width=1179&height=2556
+```
+
+Weekly dots instead:
+
+```text
+https://YOURDOMAIN/api/calendar?calendar=goal&goal=Finish%20fellowship&date=2027-06-30&unit=weeks&width=1179&height=2556
+```
+
+The goal date and birthday use the `YYYY-MM-DD` format. Text in query parameters should be URL-encoded; spaces are `%20` and a `#` in a color is `%23`.
+
+## Fix for square / missing text on Vercel
+
+The renderer uses `sharp` to rasterize an SVG. SVG `<text>` elements are resolved through Pango and Fontconfig; a minimal serverless Linux environment may have no usable fonts, even though local macOS or desktop rendering works. The output then contains rectangular glyph placeholders.
+
+This update makes font selection deterministic:
+
+1. `roboto-npm-webfont` is a pinned npm dependency that supplies Roboto TrueType fonts.
+2. `api/calendar.js` configures a Fontconfig file in the writable temporary directory **before requiring `sharp`**.
+3. The SVG explicitly requests `Roboto` instead of platform-dependent `Arial`/`Helvetica` fallbacks.
+4. `vercel.json` includes the dependency's font directory in the serverless function bundle so the font files are available at runtime.
+
+No manual font installation or Vercel system-package configuration is needed. Deploy the updated `package.json`, `api/calendar.js`, and `vercel.json` together. If a `package-lock.json` exists in your repository, regenerate it with `npm install` and commit it so the pinned dependency is included reproducibly.
+
+## URL parameters
 
 | Parameter | Meaning | Examples / defaults |
 |---|---|---|
-| `calendar` | Select image calendar on the root URL | `age`, `yearly`, `goal` |
-| `birthday` or `dob` | Date of birth (age calendar) | `2000-04-23` (required for age images) |
+| `calendar` | Calendar type for `/api/calendar` | `age`, `yearly`, `goal`; defaults to `age` |
+| `birthday` or `dob` | Date of birth for Life Calendar | `2000-04-23` (required for age image) |
 | `age` or `targetAge` | Target lifespan in years | `90` |
-| `year` | Year to render | current year |
-| `goal` or `goalTitle` | Goal name | `Finish my fellowship` |
-| `unit`, `dotUnit`, `dotsAs`, or `granularity` | Dot unit for Life, Yearly, or Goal image | `weeks` (default for Life/Yearly), `days` (default for Goal) |
-| `date` or `targetDate` | Goal target date | `2027-06-30` (required for goal images) |
-| `title` | Custom heading; an empty `title=` hides it | Age defaults to no heading; yearly defaults to the year; goal defaults to the goal name |
-| `caption` | Custom caption below the dots; an empty `caption=` hides it | Age defaults to percentage of target age; yearly to current week or year; goal to countdown and target date |
-| `width`, `height` | JPEG pixel dimensions | `1179`, `2556`; large requests are capped to avoid excessive browser memory use |
-| `bg` or `background` | Background color | `%230c0a09` (dark) |
-| `dot` or `dotColor` | Color for elapsed/normal dots | `%23f5f5f4` |
-| `futureColor` | Color for future weeks | `%2344403c` |
-| `currentColor` | Highlight today/current week | `%23ef4444` |
-| `goalColor` | Highlight the target-date dot in a goal image | `%23f59e0b` |
-| `maxDotsPerRow` | Maximum number of dots on each row (last row may be shorter) | Mode-dependent default; integer `1`–`2000` |
-| `rowAlign` or `alignment` | Align each row of dots | `left`, `center` (default), `right` |
-| `hideGoalName=1` | Hide the default Goal Calendar title | `1`; a custom `title=` takes precedence |
-| `hideTitle=1` or `showTitle=0` | Hide the heading for any calendar | `1` / `0` |
-| `hideCaption=1` or `showCaption=0` | Hide the caption below the dots | `1` / `0` |
-| `paddingTop`, `paddingRight`, `paddingBottom`, `paddingLeft` | Set independent padding on each side as a percentage of canvas height (top/bottom) or width (left/right) | `0`–`40`; default `0` |
-| `padding` | Set the same percentage padding on every side unless overridden by side-specific parameters | `0`–`40`; default `0` |
-| `dotSize`, `circleSize`, or `size` | Dot diameter preset | `smaller`, `default`, `larger` |
-| `download` | Automatically prompt a JPG download | `1` |
+| `year` | Year to render | Current year |
+| `goal`, `goalTitle`, `target`, or `name` | Goal name | `Finish fellowship` |
+| `date` or `targetDate` | Goal target date | `2027-06-30` (required for goal image) |
+| `unit`, `dotUnit`, `dotsAs`, or `granularity` | Dot unit | `days` or `weeks`; defaults to weeks for Life/Yearly and days for Goal |
+| `title` | Custom heading; `title=` hides it | Age defaults to no title; Yearly defaults to year; Goal defaults to goal name |
+| `caption` | Custom caption; `caption=` hides it | Defaults to lifespan percentage, yearly progress, or goal countdown |
+| `width`, `height` | Output pixel dimensions | `1179`, `2556`; maximum area is capped at 16 million pixels |
+| `bg` or `background` | Background color | `%230c0a09` |
+| `dot` or `dotColor` | Normal/past dots | `%23f5f5f4` |
+| `futureColor` | Future dots | `%2344403c` |
+| `currentColor` | Current day/week highlight | `%23ef4444` |
+| `goalColor` | Target-date dot | `%23f59e0b` |
+| `maxDotsPerRow` | Maximum dots per row | `1`–`2000`; default depends on calendar/unit |
+| `rowAlign` or `alignment` | Row alignment | `left`, `center`, `right` |
+| `hideGoalName=1` | Hide default goal title | `1`; explicit custom `title` takes precedence |
+| `hideTitle=1` or `showTitle=0` | Hide heading | `1` / `0` |
+| `hideCaption=1` or `showCaption=0` | Hide caption | `1` / `0` |
+| `paddingTop`, `paddingRight`, `paddingBottom`, `paddingLeft` | Percentage padding per side | `0`–`40` |
+| `padding` | Same percentage padding on each side unless overridden | `0`–`40` |
+| `dotSize`, `circleSize`, or `size` | Circle size | `smaller`, `default`, `larger` |
+| `timezone` or `tz` | Time zone used for current-day highlight | Default `Asia/Jakarta`; e.g. `Asia/Jakarta`, `America/New_York` |
 
-Example: life in days with a chosen row width, alignment, padding, and smaller dots:
-
-```text
-/life?birthday=2000-04-23&age=90&unit=days&maxDotsPerRow=140&rowAlign=center&paddingTop=8&paddingRight=5&paddingBottom=8&paddingLeft=5&dotSize=smaller&width=1179&height=2556
-```
-
-Example: yearly daily view with left-aligned rows:
+Example with layout and colors:
 
 ```text
-/yearly?year=2026&unit=days&maxDotsPerRow=31&rowAlign=left&dotSize=default
+https://YOURDOMAIN/api/calendar?calendar=age&birthday=2000-04-23&age=90&unit=days&maxDotsPerRow=140&rowAlign=center&paddingTop=8&paddingRight=5&paddingBottom=8&paddingLeft=5&dotSize=smaller&width=1179&height=2556&bg=%230c0a09&dot=%23f5f5f4&currentColor=%23ef4444
 ```
 
-Example: goal image without the goal name and caption:
+## Deployment requirements
 
-```text
-/goal?goal=Finish%20fellowship&date=2027-06-30&hideGoalName=1&hideCaption=1
+A pure static host cannot generate a dynamic binary JPEG response from URL parameters. This project uses a Node.js Vercel Function and a minimal local Node server.
+
+### Local testing
+
+Run this from the project directory:
+
+```bash
+npm install
+npm start
 ```
 
-For example, a customized life calendar:
+The server listens on port `8080` by default. Stop any existing server using that port first. If it is occupied, run `PORT=8081 npm start` and update the URL port.
 
-```text
-/life?birthday=2000-04-23&age=90&height=2556&width=1179&title=My%20Life&caption=Make%20the%20weeks%20count&bg=%230c0a09&dot=%23f5f5f4&currentColor=%23ef4444
+Test a raw JPEG locally:
+
+```bash
+curl -sS -D headers.txt -o goal.jpg 'http://127.0.0.1:8080/api/calendar?calendar=goal&goal=Finish%20fellowship&date=2027-06-30&unit=days&width=1179&height=2556'
+cat headers.txt
+file goal.jpg
 ```
 
-## Deployment notes
+The response should include `Content-Type: image/jpeg`; `file goal.jpg` should identify a JPEG image. The first three bytes should be `FF D8 FF` (JPEG signature).
 
-1. Replace the deployed app's `index.html` and `sw.js` with the supplied versions. Keep your existing icon files alongside them.
-2. Keep `manifest.webmanifest` in the same directory.
-3. On Vercel, include `vercel.json` so paths such as `/life?...`, `/yearly?...`, and `/goal?...` serve the app shell. Query-based URLs at the root (`/?calendar=age...`) do not depend on path rewrites.
-4. The JPG is generated client-side; this is not a server endpoint returning `Content-Type: image/jpeg`. The URL opens a page displaying a generated JPEG and a download link.
+`127.0.0.1` refers to the device making the request. If MacroDroid runs on an Android phone while the server runs on a Mac/PC, use the computer's reachable LAN IP (and allow the port through its firewall), or use the deployed Vercel domain.
+
+### Vercel deployment
+
+1. Add/update `api/calendar.js`, `server.js`, `package.json`, and `vercel.json` in the repository root.
+2. Keep `index.html`, `sw.js`, `manifest.webmanifest`, and the existing icon assets alongside them.
+3. Run `npm install` and commit the updated lockfile if your repository uses one.
+4. Deploy the project to Vercel.
+5. Test any of the three sample URLs above. To inspect headers and save the raw bytes, run:
+
+```bash
+curl -sS -D headers.txt -o calendar.jpg 'https://YOURDOMAIN/api/calendar?calendar=age&birthday=2000-04-23&age=90&unit=days&width=1179&height=2556'
+cat headers.txt
+file calendar.jpg
+```
+
+For automation, save the HTTP response body as a `.jpg` file. Do not use a browser-page scraping or “force save as JPG” conversion action; the endpoint already returns raw JPEG bytes.

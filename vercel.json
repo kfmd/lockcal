@@ -1,11 +1,38 @@
 {
   "rewrites": [
-    { "source": "/image", "destination": "/api/calendar" },
-    { "source": "/life", "destination": "/api/calendar?__route=age" },
-    { "source": "/age", "destination": "/api/calendar?__route=age" },
-    { "source": "/year", "destination": "/api/calendar?__route=yearly" },
-    { "source": "/yearly", "destination": "/api/calendar?__route=yearly" },
-    { "source": "/goal", "destination": "/api/calendar?__route=goal" },
-    { "source": "/goals", "destination": "/api/calendar?__route=goal" }
-  ]
+    {
+      "source": "/image",
+      "destination": "/api/calendar"
+    },
+    {
+      "source": "/life",
+      "destination": "/api/calendar?__route=age"
+    },
+    {
+      "source": "/age",
+      "destination": "/api/calendar?__route=age"
+    },
+    {
+      "source": "/year",
+      "destination": "/api/calendar?__route=yearly"
+    },
+    {
+      "source": "/yearly",
+      "destination": "/api/calendar?__route=yearly"
+    },
+    {
+      "source": "/goal",
+      "destination": "/api/calendar?__route=goal"
+    },
+    {
+      "source": "/goals",
+      "destination": "/api/calendar?__route=goal"
+    }
+  ],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/calendar.js": {
+      "includeFiles": "node_modules/roboto-npm-webfont/fonts/**"
+    }
+  }
 }

@@ -2,6 +2,53 @@
 
 // Vercel serverless endpoint that returns the actual JPEG bytes (not HTML).
 // Example: /api/calendar?calendar=goal&goal=Finish%20fellowship&date=2027-06-30&unit=days
+//
+// Sharp/libvips renders SVG <text> through Pango + Fontconfig. Serverless hosts
+// may not have any OS fonts installed, which causes text to become square glyphs.
+// Use the bundled Roboto TTFs from the npm dependency and a private Fontconfig
+// file before loading Sharp so rendering is deterministic on local and Vercel.
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
+function configureBundledFontconfig() {
+  const root = path.resolve(__dirname, '..');
+  const candidates = [
+    path.join(root, 'node_modules', 'roboto-npm-webfont', 'fonts'),
+    path.join(process.cwd(), 'node_modules', 'roboto-npm-webfont', 'fonts'),
+    '/usr/share/fonts/truetype/roboto',
+    '/usr/local/share/fonts',
+  ];
+  const fontDir = candidates.find(dir => {
+    try { return fs.statSync(dir).isDirectory() && fs.readdirSync(dir).length > 0; }
+    catch { return false; }
+  });
+
+  if (!fontDir) {
+    // Fail loudly at render time instead of silently emitting unreadable squares.
+    throw new Error('No usable font directory found. Ensure roboto-npm-webfont is installed.');
+  }
+
+  const configDir = path.join(os.tmpdir(), 'life-calendar-fontconfig');
+  const cacheDir = path.join(os.tmpdir(), 'life-calendar-fontconfig-cache');
+  fs.mkdirSync(configDir, { recursive: true });
+  fs.mkdirSync(cacheDir, { recursive: true });
+  const xmlSafe = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const configFile = path.join(configDir, 'fonts.conf');
+  fs.writeFileSync(configFile, [
+    '<?xml version="1.0"?>',
+    '<!DOCTYPE fontconfig SYSTEM "fonts.dtd">',
+    '<fontconfig>',
+    `  <dir>${xmlSafe(fontDir)}</dir>`,
+    `  <cachedir>${xmlSafe(cacheDir)}</cachedir>`,
+    '  <config></config>',
+    '</fontconfig>',
+  ].join('\n'));
+  process.env.FONTCONFIG_FILE = configFile;
+  process.env.FONTCONFIG_PATH = configDir;
+}
+
+configureBundledFontconfig();
 const sharp = require('sharp');
 
 const DAY_MS = 86400000;
@@ -155,7 +202,7 @@ function buildSvg(cfg) {
     const estimatedWidth = valueText.length * size * 0.58;
     const fitAttrs = estimatedWidth > contentW * 0.96
       ? ` textLength="${Math.max(1, contentW * 0.96).toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '';
-    pieces.push(`<text x="${centerX.toFixed(2)}" y="${y.toFixed(2)}" fill="${color}" font-family="Arial,Helvetica,sans-serif" font-size="${Math.round(size)}" font-weight="${weight}" text-anchor="middle" dominant-baseline="middle"${fitAttrs}>${xml(valueText)}</text>`);
+    pieces.push(`<text x="${centerX.toFixed(2)}" y="${y.toFixed(2)}" fill="${color}" font-family="Roboto,sans-serif" font-size="${Math.round(size)}" font-weight="${weight}" text-anchor="middle" dominant-baseline="middle"${fitAttrs}>${xml(valueText)}</text>`);
   };
   if (cfg.showTitle && cfg.title) text(cfg.title, top + contentH * 0.055, titleSize, cfg.dot, 700);
   const gridTop = top + contentH * (cfg.showTitle && cfg.title ? 0.14 : 0.035);
