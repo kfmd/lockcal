@@ -52,6 +52,70 @@ main{max-width:1100px;margin:0 auto;padding:16px}
 .tab{white-space:nowrap;display:flex;align-items:center;gap:6px}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex:none}
 
+.mode-tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 8px;max-width:1100px;margin:0 auto;border-bottom:1px solid var(--line)}
+.mode-tab{white-space:nowrap;border-radius:999px;padding:8px 14px;background:transparent;border-color:transparent;color:var(--muted)}
+.mode-tab[aria-current="page"]{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.simple-view{max-width:1100px;margin:0 auto;padding:20px 16px 30px}
+.simple-head{text-align:center;margin:4px 0 18px}
+.simple-head h1{font-size:clamp(22px,3vw,30px);margin:0;letter-spacing:.04em}
+.simple-head p{color:var(--muted);margin:6px 0 0}
+.simple-panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 auto 18px;max-width:760px}
+.simple-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.simple-form label{display:block;font-size:12px;color:var(--muted)}
+.simple-form input{margin-top:4px}
+.simple-form button{min-height:38px}
+.simple-grid-wrap{overflow-x:auto;padding:12px 0 20px}
+.life-grid{display:grid;grid-template-columns:32px repeat(52,var(--life-dot,10px));column-gap:var(--life-gap,3px);row-gap:var(--life-gap,3px);align-items:center;justify-content:center;width:max-content;max-width:100%;margin:0 auto}
+.life-age-label{font-size:10px;color:var(--muted);text-align:right;padding-right:4px;font-variant-numeric:tabular-nums}
+.life-week-dot{width:var(--life-dot,10px);height:var(--life-dot,10px);border-radius:50%;background:var(--future-dot,#44403c);display:block}
+.life-week-dot.past{background:var(--past-dot,#d6d3d1)}
+.life-week-dot.current{background:var(--now-dot,#ef4444);box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--now-dot,#ef4444)}
+.year-dot-grid{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:clamp(10px,2vw,24px);width:min(760px,100%);margin:24px auto 18px;justify-items:center;align-items:center}
+.year-dot{width:clamp(13px,3.6vw,34px);aspect-ratio:1;border-radius:50%;background:var(--future-dot,#44403c);display:block}
+.year-dot.past{background:var(--past-dot,#d6d3d1)}
+.year-dot.current{background:var(--now-dot,#ef4444);box-shadow:0 0 0 3px color-mix(in srgb,var(--now-dot,#ef4444) 24%,transparent)}
+.simple-stat{text-align:center;color:var(--muted);font-size:13px;margin:8px 0 0}
+.goal-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;max-width:900px;margin:18px auto}
+.goal-card{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:16px;min-width:0}
+.goal-card h2{font-size:17px;margin:0 0 6px;overflow-wrap:anywhere}
+.goal-card .goal-date{color:var(--muted);font-size:13px}
+.goal-countdown{font-size:24px;font-weight:750;letter-spacing:-.02em;margin:14px 0 10px}
+.goal-card .goal-actions{display:flex;justify-content:flex-end;margin-top:12px}
+.goal-unit-panel{max-width:900px;margin:0 auto 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.goal-unit-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.goal-unit-controls .muted{font-size:13px}
+.goal-unit-controls button{min-width:76px}
+.goal-unit-note{width:100%;margin:0;color:var(--muted);font-size:12px}
+.goal-preview-title{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:16px;color:var(--muted);font-size:11px}
+.goal-preview-scroll{max-height:170px;overflow:auto;margin:8px auto 6px;padding:5px 3px;overscroll-behavior:contain}
+.goal-dot-grid{display:grid;grid-template-columns:repeat(var(--goal-cols,20),var(--goal-dot-size,8px));gap:6px;width:max-content;margin:0 auto;justify-content:center;align-items:center}
+.goal-dot{display:block;width:var(--goal-dot-size,8px);height:var(--goal-dot-size,8px);border-radius:50%;background:#44403c;flex:none}
+.goal-dot.past{background:var(--lived,#d6d3d1)}
+.goal-dot.current{background:var(--now,#ef4444);box-shadow:0 0 0 2px var(--panel),0 0 0 3px var(--now,#ef4444)}
+.goal-dot.target{background:#f59e0b}
+.goal-dot.both{background:#f59e0b;outline:2px solid var(--now,#ef4444);outline-offset:2px}
+.goal-preview-legend{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:11px;margin-top:6px}
+.goal-preview-legend span{display:inline-flex;align-items:center;gap:5px}
+.goal-preview-legend i{width:8px;height:8px;border-radius:50%;display:inline-block;background:var(--now,#ef4444)}
+.goal-preview-legend i.target{background:#f59e0b}
+.simple-empty{text-align:center;color:var(--muted);padding:24px 12px}
+#simpleView .hint{display:block;text-align:center;margin:8px auto}
+@media(max-width:640px){
+ .mode-tabs{padding:10px 12px 8px}
+ .mode-tab{padding:8px 12px}
+ .simple-view{padding:14px 12px 24px}
+ .simple-panel{padding:12px}
+ .simple-form{grid-template-columns:1fr 1fr}
+ .simple-form button{grid-column:1/-1}
+ .life-grid{--life-dot:4px;--life-gap:2px;grid-template-columns:25px repeat(52,var(--life-dot));column-gap:var(--life-gap);row-gap:var(--life-gap)}
+ .life-age-label{font-size:9px}
+ .year-dot-grid{gap:10px;margin:20px auto}
+ .goal-preview-scroll{max-height:150px}
+ .goal-dot-grid{--goal-dot-size:6px;gap:5px}
+ .goal-preview-legend i{width:7px;height:7px}
+ .goal-unit-panel{align-items:flex-start}
+}
+
 .cal-header{text-align:center;margin:8px 0 14px}
 .cal-header h1{margin:0;font-size:22px;letter-spacing:.18em;text-transform:uppercase}
 .sub{margin:4px 0 0;color:var(--muted);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
@@ -235,12 +299,19 @@ dialog.wide{width:min(720px,calc(100vw - 32px))}
   </div>
   <input type="file" id="fileInput" accept=".json,application/json" hidden>
 </header>
+<nav id="modeTabs" class="mode-tabs no-print" aria-label="Calendar views">
+  <button type="button" class="mode-tab" data-mode="life" aria-current="page">Life Calendar</button>
+  <button type="button" class="mode-tab" data-mode="year">Yearly Calendar</button>
+  <button type="button" class="mode-tab" data-mode="goals">Goal Calendar</button>
+  <button type="button" class="mode-tab" data-mode="timeline">Timeline</button>
+</nav>
 <div id="banner" class="banner no-print" hidden></div>
 <div id="storageWarn" class="banner no-print" hidden>
   This browser isn't saving your changes (private mode or storage blocked). Use Export to keep a backup.
 </div>
 <nav id="tabs" class="tabs no-print"></nav>
 <main id="main">
+  <section id="simpleView" class="simple-view" hidden></section>
   <section id="calHeader" class="cal-header"></section>
   <section id="toolbar" class="toolbar no-print"></section>
   <section id="eventList" class="event-list no-print"></section>
@@ -295,6 +366,7 @@ const SAMPLE = {
 const state = {
   data: null,          // lifecalendar.io-shaped object
   active: 0,           // index of active calendar
+  mode: "life",       // life, year, goals, or original event timeline
   viewOnly: false,     // true when viewing a shared link
   rangeMode: false,
   rangeStart: null,
@@ -459,7 +531,26 @@ function paint(c){
 function render(){
   document.body.classList.toggle("view-only", state.viewOnly);
   renderBanner();
+  if (state.viewOnly) state.mode = "timeline";
+  renderModeTabs();
+  const simple = !state.viewOnly && state.mode !== "timeline";
+  $("modeTabs").hidden = !!state.viewOnly;
+  $("simpleView").hidden = !simple;
+  $("tabs").hidden = simple;
+  $("calHeader").hidden = simple;
+  $("toolbar").hidden = simple;
+  $("eventList").hidden = simple;
+  $("gridWrap").hidden = simple;
+  document.querySelector("#main .foot").hidden = simple;
   const has = state.data && state.data.calendars.length;
+  $("btnExport").disabled = !state.data;
+  $("btnShare").disabled = !has;
+  $("btnPrint").disabled = !has;
+  $("btnWallpaper").disabled = !has;
+  $("btnImport").hidden = state.viewOnly;
+  $("btnSettings").hidden = state.viewOnly;
+  $("fab").hidden = simple || !has || state.viewOnly;
+  if (simple){ saver.renderStatus(); renderSimpleView(); return; }
   $("btnExport").disabled = !state.data;
   $("btnShare").disabled = !has;
   $("btnPrint").disabled = !has;
@@ -858,6 +949,376 @@ function startFresh(birthdate, tz){
   state.data.calendars.push(blankCalendar("Where I have lived", "slate"));
   state.data.calendars.push(blankCalendar("Work", "stone"));
   state.active = 0; commit();
+}
+
+/* ==================================================================
+   Additional calendar views + URL-driven JPEG rendering
+   Query examples are documented in README-life-calendar.md.
+   ================================================================== */
+const SIMPLE_PREFS_KEY = "life-in-weeks:simple-view:v1";
+const GOALS_KEY = "life-in-weeks:goals:v1";
+
+function renderModeTabs(){
+  const nav = $("modeTabs");
+  if (!nav) return;
+  nav.querySelectorAll("[data-mode]").forEach(btn => {
+    const current = btn.dataset.mode === state.mode;
+    btn.setAttribute("aria-current", current ? "page" : "false");
+    btn.classList.toggle("on", current);
+  });
+}
+function setMode(mode){
+  if (!["life","year","goals","timeline"].includes(mode)) return;
+  state.mode = mode;
+  store.set("life-in-weeks:view-mode", mode);
+  state.rangeMode = false; state.rangeStart = null;
+  render();
+}
+$("modeTabs").addEventListener("click", e => {
+  const b = e.target.closest("[data-mode]");
+  if (b) setMode(b.dataset.mode);
+});
+
+function simplePrefs(){
+  let saved = {};
+  try { saved = JSON.parse(store.get(SIMPLE_PREFS_KEY) || "{}"); } catch {}
+  const fallbackDob = state.data?.preferences?.birthdate || "";
+  const y = new Date().getFullYear();
+  return {
+    birthday: isISO(saved.birthday) ? saved.birthday : fallbackDob,
+    age: clampInt(saved.age, 1, 120, 90),
+    year: clampInt(saved.year, 1900, 2200, y)
+  };
+}
+function saveSimplePrefs(p){ store.set(SIMPLE_PREFS_KEY, JSON.stringify(p)); }
+function readGoals(){
+  try {
+    const v = JSON.parse(store.get(GOALS_KEY) || "[]");
+    return Array.isArray(v) ? v.filter(g => g && typeof g.id === "string" && typeof g.name === "string" && isISO(g.date)) : [];
+  } catch { return []; }
+}
+function saveGoals(goals){ store.set(GOALS_KEY, JSON.stringify(goals)); }
+function dayCountdown(date){ return dn(date) - today(); }
+function countdownText(diff){ return diff > 0 ? `In ${diff.toLocaleString()} day${diff===1?"":"s"}` : diff === 0 ? "Today" : `${(-diff).toLocaleString()} day${diff===-1?"":"s"} ago`; }
+function prettyDate(date){ return nice(dn(date)); }
+const GOAL_UNIT_KEY = "life-in-weeks:goal-dot-unit:v1";
+function goalDotUnit(){
+  const saved = store.get(GOAL_UNIT_KEY);
+  return saved === "weeks" ? "weeks" : "days";
+}
+// Count dots across the interval between today and the goal, inclusive.
+// Week mode uses rolling seven-day blocks anchored to today/target, not Jan-1 week numbers.
+function goalCalendarModel(targetDate, unit=goalDotUnit(), todayDay=today()){
+  const targetDay = dn(targetDate);
+  const diff = targetDay - todayDay;
+  const distance = Math.abs(diff);
+  const normalizedUnit = unit === "weeks" ? "weeks" : "days";
+  const count = normalizedUnit === "weeks" ? Math.floor(distance / 7) + 1 : distance + 1;
+  const currentIndex = diff < 0 ? count - 1 : 0;
+  const targetIndex = diff < 0 ? 0 : count - 1;
+  return { targetDay, diff, distance, unit:normalizedUnit, count, currentIndex, targetIndex };
+}
+function goalDotStatus(model, index){
+  const isCurrent = index === model.currentIndex;
+  const isTarget = index === model.targetIndex;
+  if (isCurrent && isTarget) return "both";
+  if (isCurrent) return "current";
+  if (isTarget) return "target";
+  return model.diff < 0 ? "past" : "future";
+}
+function renderGoalDotGrid(date, unit){
+  const model = goalCalendarModel(date, unit);
+  const cols = Math.min(model.count, 20);
+  const dots = Array.from({length:model.count}, (_, i) => {
+    const status = goalDotStatus(model, i);
+    const label = status === "both" ? "Today and target date" : status === "current" ? "Today" : status === "target" ? "Target date" : `${unit === "weeks" ? "Week" : "Day"} ${i+1}`;
+    return `<span class="goal-dot ${status}" title="${esc(label)}" aria-label="${esc(label)}"></span>`;
+  }).join("");
+  const unitLabel = unit === "weeks" ? "week" : "day";
+  return `<div class="goal-preview-title"><span>Countdown calendar</span><span>${model.count.toLocaleString()} ${unitLabel} dot${model.count===1?"":"s"}</span></div>
+    <div class="goal-preview-scroll" aria-label="${model.count} ${unit} dots"><div class="goal-dot-grid" style="--goal-cols:${cols}">${dots}</div></div>
+    <div class="goal-preview-legend"><span><i></i>Today</span><span><i class="target"></i>Target date</span></div>`;
+}
+function weekIndexInYear(date, year){
+  if (!isISO(date)) return -1;
+  const start = dn(`${year}-01-01`), end = dn(`${year}-12-31`), t = dn(date);
+  if (t < start || t > end) return -1;
+  return Math.min(51, Math.floor((t - start) / 7));
+}
+function renderSimpleView(){
+  const el = $("simpleView");
+  if (!el) return;
+  const p = simplePrefs();
+  if (state.mode === "life"){
+    const valid = isISO(p.birthday);
+    let grid = "";
+    let stat = "Enter your date of birth and target age to start.";
+    if (valid){
+      const b = birthParts(p.birthday), now = today(), total = p.age * WEEKS;
+      const current = now < dn(p.birthday) ? -1 : cellOf(now, b).index;
+      const lived = Math.max(0, Math.min(total, current + 1));
+      const pct = (lived / total * 100).toFixed(1);
+      stat = `${lived.toLocaleString()} of ${total.toLocaleString()} weeks · ${pct}% of your ${p.age}-year target`;
+      grid = `<div class="simple-grid-wrap"><div class="life-grid" style="--past-dot:#d6d3d1;--future-dot:#44403c;--now-dot:#ef4444">` +
+        Array.from({length:p.age}, (_, age) => `<div class="life-age-label">${age}</div>` + Array.from({length:WEEKS}, (_, week) => {
+          const i = age * WEEKS + week;
+          const cls = i === current ? "current" : i < current ? "past" : "future";
+          return `<span class="life-week-dot ${cls}" title="Age ${age}, week ${week+1}"></span>`;
+        }).join("")).join("") + `</div></div>`;
+    }
+    el.innerHTML = `<div class="simple-head"><h1>Life Calendar</h1><p>One dot represents one week of your life.</p></div>
+      <form id="lifeForm" class="simple-panel simple-form">
+        <label>Date of birth<input id="lifeDob" name="birthday" type="date" required value="${esc(p.birthday)}"></label>
+        <label>Target age (years)<input id="lifeAge" name="age" type="number" min="1" max="120" step="1" required value="${p.age}"></label>
+        <button class="primary" type="submit">Update calendar</button>
+      </form><p class="simple-stat">${esc(stat)}</p>${grid}`;
+    $("lifeForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const birthday = $("lifeDob").value, age = clampInt($("lifeAge").value, 1, 120, 90);
+      if (!isISO(birthday)) return;
+      const next = { ...simplePrefs(), birthday, age };
+      saveSimplePrefs(next); renderSimpleView();
+    });
+    return;
+  }
+  if (state.mode === "year"){
+    const year = p.year, nowDate = iso(today()), currentYear = new Date(today()*DAY).getUTCFullYear();
+    const current = year === currentYear ? weekIndexInYear(nowDate, year) : -1;
+    const currentWeek = current >= 0 ? current + 1 : 0;
+    const dots = Array.from({length:WEEKS}, (_, i) => {
+      const cls = i === current ? "current" : year < currentYear || (year === currentYear && i < current) ? "past" : "future";
+      return `<span class="year-dot ${cls}" title="${esc(`Week ${i+1} of ${year}`)}"></span>`;
+    }).join("");
+    const stat = current >= 0 ? `Current week: ${currentWeek} of 52` : year < currentYear ? `${year} has passed` : `${year} has not started`;
+    el.innerHTML = `<div class="simple-head"><h1>Yearly Calendar</h1><p>See the year as 52 weekly dots. The current week is highlighted.</p></div>
+      <form id="yearForm" class="simple-panel simple-form" style="grid-template-columns:minmax(0,1fr) auto;max-width:460px">
+        <label>Calendar year<input id="yearValue" type="number" min="1900" max="2200" step="1" required value="${year}"></label>
+        <button class="primary" type="submit">Update year</button>
+      </form><div class="year-dot-grid" style="--past-dot:#d6d3d1;--future-dot:#44403c;--now-dot:#ef4444">${dots}</div>
+      <p class="simple-stat">${esc(stat)}</p>`;
+    $("yearForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const yearValue = clampInt($("yearValue").value, 1900, 2200, new Date().getFullYear());
+      saveSimplePrefs({ ...simplePrefs(), year:yearValue }); renderSimpleView();
+    });
+    return;
+  }
+  if (state.mode === "goals"){
+    const goals = readGoals().sort((a,b) => a.date.localeCompare(b.date));
+    const unit = goalDotUnit();
+    const cards = goals.map(g => {
+      const diff = dayCountdown(g.date);
+      return `<article class="goal-card"><h2>${esc(g.name)}</h2><div class="goal-date">${esc(prettyDate(g.date))}</div>
+        <div class="goal-countdown">${esc(countdownText(diff))}</div>
+        <div class="goal-date">${diff > 0 ? `${diff.toLocaleString()} days remaining` : diff === 0 ? "Target date is today" : `Target date passed ${(-diff).toLocaleString()} days ago`}</div>
+        ${renderGoalDotGrid(g.date, unit)}
+        <div class="goal-actions"><button type="button" class="danger" data-delete-goal="${esc(g.id)}">Delete</button></div></article>`;
+    }).join("");
+    el.innerHTML = `<div class="simple-head"><h1>Goal Calendar</h1><p>Track the days or weeks between today and each target date. Each goal includes a live dot-calendar preview.</p></div>
+      <section class="simple-panel goal-unit-panel" aria-label="Goal calendar dot interval">
+        <div class="goal-unit-controls"><span class="muted">Show dots as</span>
+          <button type="button" data-goal-unit="days" class="${unit === "days" ? "on" : ""}" aria-pressed="${unit === "days"}">Days</button>
+          <button type="button" data-goal-unit="weeks" class="${unit === "weeks" ? "on" : ""}" aria-pressed="${unit === "weeks"}">Weeks</button>
+        </div>
+        <p class="goal-unit-note">Days mode shows one dot per calendar day, including today and the target date. Weeks mode groups the interval into rolling seven-day blocks. When today and the target occupy the same dot, one dot carries both markers.</p>
+      </section>
+      <form id="goalForm" class="simple-panel simple-form">
+        <label>Goal / target name<input id="goalName" type="text" maxlength="120" required placeholder="e.g. Finish fellowship"></label>
+        <label>Target date<input id="goalDate" type="date" required></label>
+        <button class="primary" type="submit">Add goal</button>
+      </form>
+      ${cards ? `<div class="goal-list">${cards}</div>` : `<div class="simple-empty">No goals yet. Add a target date above to start your countdown.</div>`}`;
+    el.querySelectorAll("[data-goal-unit]").forEach(btn => btn.addEventListener("click", () => {
+      store.set(GOAL_UNIT_KEY, btn.dataset.goalUnit);
+      renderSimpleView();
+    }));
+    $("goalForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const name = $("goalName").value.trim(), date = $("goalDate").value;
+      if (!name || !isISO(date)) return;
+      const list = readGoals(); list.push({ id:newId(), name, date, createdAt:new Date().toISOString() });
+      saveGoals(list); renderSimpleView();
+    });
+    el.querySelectorAll("[data-delete-goal]").forEach(btn => btn.addEventListener("click", () => {
+      const id = btn.dataset.deleteGoal;
+      saveGoals(readGoals().filter(g => g.id !== id)); renderSimpleView();
+    }));
+  }
+}
+
+function validHex(value, fallback){
+  if (typeof value !== "string") return fallback;
+  let v = value.trim();
+  if (/^#[0-9a-f]{3}$/i.test(v)) v = "#" + [...v.slice(1)].map(ch => ch+ch).join("");
+  return /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : fallback;
+}
+function firstParam(params, names){
+  for (const name of names){ if (params.has(name)) return params.get(name); }
+  return null;
+}
+function imageRouteConfig(){
+  const params = new URLSearchParams(location.search);
+  const last = decodeURIComponent(location.pathname).replace(/\/+$/ , "").split("/").pop().toLowerCase();
+  const pathModes = { life:"age", age:"age", yearly:"yearly", year:"yearly", goal:"goal", goals:"goal" };
+  const aliases = { age:"age", life:"age", "life-calendar":"age", life_calendar:"age", yearly:"yearly", year:"yearly", goal:"goal", goals:"goal" };
+  const raw = firstParam(params,["calendar","type","view"]);
+  const requested = raw === null ? null : aliases[String(raw).toLowerCase()];
+  const pathMode = pathModes[last];
+  const flag = params.get("image") === "1" || ["jpg","jpeg"].includes((params.get("format")||"").toLowerCase()) || params.get("render") === "jpg";
+  if (!pathMode && !requested && !flag) return null;
+  const mode = pathMode || requested || aliases[String(params.get("calendar")||"age").toLowerCase()] || "age";
+  const currentYear = new Date().getFullYear();
+  const birthday = firstParam(params,["birthday","dob"]);
+  const age = clampInt(firstParam(params,["age","targetAge","target_age"]),1,120,90);
+  const year = clampInt(params.get("year"),1900,2200,currentYear);
+  const goalName = firstParam(params,["goalTitle","goal","target","name"]) || "Goal Calendar";
+  const goalDate = firstParam(params,["date","targetDate","target_date","goalDate"]);
+  const rawUnit = String(firstParam(params,["unit","dotUnit","dotsAs","granularity"]) || "days").toLowerCase();
+  const dotUnit = ["week","weeks"].includes(rawUnit) ? "weeks" : "days";
+  const width = clampInt(params.get("width"),240,4096,1179);
+  const height = clampInt(params.get("height"),240,4096,2556);
+  let w = width, h = height;
+  if (w*h > 16000000){ const factor = Math.sqrt(16000000/(w*h)); w = Math.max(240,Math.floor(w*factor)); h = Math.max(240,Math.floor(h*factor)); }
+  return {
+    mode, params, birthday, age, year, goalName, goalDate, dotUnit,
+    width:w, height:h,
+    title:params.has("title") ? params.get("title") : (mode === "yearly" ? String(year) : mode === "goal" ? goalName : ""),
+    caption:params.has("caption") ? params.get("caption") : null,
+    bg:validHex(firstParam(params,["bg","background","backgroundColor","background_color"]),"#0c0a09"),
+    dot:validHex(firstParam(params,["dot","dots","dotColor","dotsColor","dot_color"]),"#f5f5f4"),
+    future:validHex(firstParam(params,["future","futureColor","future_color"]),"#44403c"),
+    current:validHex(firstParam(params,["current","currentColor","accent","accentColor"]),"#ef4444"),
+    goal:validHex(firstParam(params,["goalColor","goal_color"]),"#f59e0b"),
+    autoDownload:params.get("download") === "1"
+  };
+}
+function drawStandaloneCalendar(cfg){
+  const canvas = document.createElement("canvas");
+  const W = cfg.width, H = cfg.height;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d", { alpha:false });
+  if (!ctx) throw new Error("Canvas is not supported by this browser.");
+  ctx.fillStyle = cfg.bg; ctx.fillRect(0,0,W,H);
+  const scale = W/1179;
+  const font = (px, weight=500) => `${Math.max(10,Math.round(px*scale))}px system-ui,-apple-system,"Segoe UI",sans-serif`;
+  const titleSize = Math.max(16, W*0.034);
+  const captionSize = Math.max(12, W*0.019);
+  const drawCentered = (text, y, size, color, weight=500) => {
+    if (!text) return;
+    ctx.fillStyle=color; ctx.font=`${weight} ${Math.round(size)}px system-ui,-apple-system,"Segoe UI",sans-serif`;
+    ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(String(text),W/2,y,W*0.88);
+  };
+  let caption = cfg.caption;
+  if (cfg.mode === "age"){
+    if (!isISO(cfg.birthday)) throw new Error("Life calendar image needs birthday=YYYY-MM-DD. Example: ?calendar=age&birthday=2000-04-23&age=90");
+    const birth = birthParts(cfg.birthday), now = today();
+    const total = cfg.age * WEEKS;
+    const current = now < dn(cfg.birthday) ? -1 : cellOf(now,birth).index;
+    const lived = Math.max(0,Math.min(total,current+1));
+    if (caption === null) caption = `${(lived/total*100).toFixed(1)}% to ${cfg.age}`;
+    if (cfg.title) drawCentered(cfg.title,H*0.145,titleSize,cfg.dot,700);
+    const pitchX = Math.min(W*0.84/52,H*0.62/cfg.age);
+    const pitchY = Math.max(pitchX,H*0.62/cfg.age);
+    const d = Math.max(1.5,pitchX*0.58), gridH=(cfg.age-1)*pitchY+d;
+    const x0=(W-(51*pitchX+d))/2;
+    const gridAreaTop=H*0.20, gridAreaHeight=H*0.64;
+    const y0=gridAreaTop+Math.max(0,(gridAreaHeight-gridH)/2);
+    for (let age=0; age<cfg.age; age++){
+      for (let week=0; week<WEEKS; week++){
+        const i=age*WEEKS+week;
+        ctx.fillStyle = i===current ? cfg.current : i<current ? cfg.dot : cfg.future;
+        ctx.beginPath(); ctx.arc(x0+week*pitchX+d/2,y0+age*pitchY+d/2,d/2,0,Math.PI*2); ctx.fill();
+      }
+    }
+    drawCentered(caption,Math.min(H*0.94,y0+gridH+H*0.055),captionSize,"#a8a29e",400);
+    return canvas;
+  }
+  if (cfg.mode === "yearly"){
+    const year = cfg.year;
+    const now=iso(today()), currentYear=new Date(today()*DAY).getUTCFullYear();
+    const highlight = year===currentYear ? weekIndexInYear(now,year) : -1;
+    if (caption===null) caption = highlight>=0 ? `Week ${highlight+1} of 52` : String(year);
+    if (cfg.title) drawCentered(cfg.title,H*0.27,titleSize,cfg.dot,700);
+    const pitch=Math.min(W*0.78/13,H*0.28/4), d=Math.max(3,pitch*0.56);
+    const gridW=12*pitch+d, gridH=3*pitch+d, x0=(W-gridW)/2, y0=(H-gridH)/2;
+    for (let i=0;i<WEEKS;i++){
+      const past = year < currentYear || (year===currentYear && i<highlight);
+      let color = past ? cfg.dot : cfg.future;
+      if (i===highlight && highlight>=0) color=cfg.current;
+      const x=x0+(i%13)*pitch+d/2, y=y0+Math.floor(i/13)*pitch+d/2;
+      ctx.fillStyle=color; ctx.beginPath(); ctx.arc(x,y,d/2,0,Math.PI*2); ctx.fill();
+    }
+    drawCentered(caption,H*0.76,captionSize,"#a8a29e",400);
+    return canvas;
+  }
+  if (cfg.mode === "goal"){
+    if (!isISO(cfg.goalDate)) throw new Error("Goal image needs date=YYYY-MM-DD. Example: ?calendar=goal&goal=My%20Goal&date=2027-01-01&unit=days");
+    const model = goalCalendarModel(cfg.goalDate, cfg.dotUnit, today());
+    const unitLabel = model.count === 1 ? (cfg.dotUnit === "weeks" ? "week dot" : "day dot") : (cfg.dotUnit === "weeks" ? "week dots" : "day dots");
+    if (caption===null) caption = `${countdownText(model.diff)} · ${prettyDate(cfg.goalDate)} · ${model.count.toLocaleString()} ${unitLabel}`;
+    if (cfg.title) drawCentered(cfg.title,H*0.16,titleSize,cfg.dot,700);
+
+    // The goal interval starts at today for a future target, or at the target for a past goal.
+    // It uses one continuous interval, so a short countdown can never create a duplicate "current" dot.
+    const maxCols = cfg.dotUnit === "weeks" ? 13 : 20;
+    const cols = Math.min(model.count, maxCols);
+    const rows = Math.ceil(model.count / maxCols);
+    const gridAreaTop = H*0.28, gridAreaHeight = H*0.43;
+    const pitch = Math.max(1.5, Math.min(W*0.84/maxCols, gridAreaHeight/Math.max(1,rows), 44*scale));
+    const d = Math.max(1, Math.min(24*scale, pitch*0.62));
+    const gridHeight = (rows-1)*pitch+d;
+    const y0 = gridAreaTop + Math.max(0,(gridAreaHeight-gridHeight)/2);
+    for (let i=0; i<model.count; i++){
+      const row = Math.floor(i/maxCols);
+      const col = i % maxCols;
+      const rowDots = Math.min(maxCols, model.count-row*maxCols);
+      const rowWidth = (rowDots-1)*pitch+d;
+      const x = (W-rowWidth)/2 + col*pitch+d/2;
+      const y = y0 + row*pitch+d/2;
+      const isCurrent = i === model.currentIndex;
+      const isTarget = i === model.targetIndex;
+      let color = model.diff < 0 ? cfg.dot : cfg.future;
+      if (isCurrent) color=cfg.current;
+      if (isTarget) color=cfg.goal;
+      ctx.fillStyle=color;
+      ctx.beginPath(); ctx.arc(x,y,d/2,0,Math.PI*2); ctx.fill();
+      // When today and target are the same day/week, render ONE goal-colored dot with a current-color ring.
+      if (isCurrent && isTarget){
+        ctx.strokeStyle=cfg.current;
+        ctx.lineWidth=Math.max(1,Math.min(3*scale,d*0.16));
+        ctx.beginPath(); ctx.arc(x,y,d/2+ctx.lineWidth*1.25,0,Math.PI*2); ctx.stroke();
+      }
+    }
+    drawCentered(caption,H*0.79,captionSize,"#a8a29e",400);
+    return canvas;
+  }
+  throw new Error("Unknown calendar type. Use calendar=age, calendar=yearly, or calendar=goal.");
+}
+function renderStandaloneImage(cfg){
+  document.documentElement.style.setProperty("--bg",cfg.bg);
+  document.body.innerHTML = `<main class="generated-jpg-page" style="--generated-bg:${cfg.bg}"><div id="generatedStatus" role="status" class="generated-status">Generating JPEG…</div></main>`;
+  const wrap=document.querySelector(".generated-jpg-page");
+  wrap.style.cssText=`min-height:100dvh;background:${cfg.bg};display:flex;flex-direction:column;align-items:center;justify-content:flex-start;margin:0;padding:0;color:#f5f5f4;font-family:system-ui,-apple-system,sans-serif`;
+  try{
+    const canvas=drawStandaloneCalendar(cfg);
+    canvas.toBlob(blob=>{
+      const status=document.getElementById("generatedStatus");
+      if(!blob){status.textContent="This browser could not encode the image as JPEG.";return;}
+      const url=URL.createObjectURL(blob);
+      const img=document.createElement("img");
+      img.alt=cfg.title || "Generated calendar JPEG";
+      img.style.cssText=`display:block;width:min(100vw,${cfg.width}px);height:auto;max-width:100%;margin:0 auto`;
+      img.src=url;
+      const download=document.createElement("a");
+      download.href=url; download.download=`${cfg.mode}-calendar-${cfg.mode==="yearly"?cfg.year:cfg.mode==="goal"?(cfg.goalDate||""):cfg.birthday||"life"}.jpg`;
+      download.textContent="Download JPG";
+      download.style.cssText="position:fixed;right:12px;top:12px;z-index:2;padding:9px 12px;border-radius:999px;background:rgba(28,25,23,.84);color:#fff;text-decoration:none;font:600 12px system-ui,sans-serif;border:1px solid rgba(255,255,255,.22)";
+      wrap.replaceChildren(img,download);
+      if(cfg.autoDownload){ setTimeout(()=>download.click(),150); }
+    },"image/jpeg",0.96);
+  } catch(err){
+    wrap.innerHTML=`<div style="max-width:680px;padding:24px;line-height:1.6"><h1 style="font-size:24px">Cannot generate calendar image</h1><p>${esc(err.message||String(err))}</p><p>Parameters supported: <code>calendar=age|yearly|goal</code>, <code>unit=days|weeks</code> for goals, <code>width</code>, <code>height</code>, <code>title</code>, <code>caption</code>, <code>bg</code>, and <code>dot</code>.</p></div>`;
+  }
 }
 
 /* ---------- mobile menu ---------- */
@@ -1659,6 +2120,8 @@ window.addEventListener("hashchange", async () => {
 
 async function init(){
   saver.loadMeta();
+  const storedMode = store.get("life-in-weeks:view-mode");
+  if (["life","year","goals","timeline"].includes(storedMode)) state.mode = storedMode;
   const z = parseInt(store.get(ZOOM_KEY), 10);
   state.zoom = Number.isFinite(z) ? z : null;
   state.viewOnly = false;
@@ -1677,7 +2140,9 @@ async function init(){
     saver.restoreFileLink();
   }
 }
-init();
+const standaloneImageConfig = imageRouteConfig();
+if (standaloneImageConfig) renderStandaloneImage(standaloneImageConfig);
+else init();
 
 // Offline support: cache the app so it opens without a connection (needs https or localhost).
 if ("serviceWorker" in navigator && window.isSecureContext && location.protocol !== "file:"){

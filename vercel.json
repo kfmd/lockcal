@@ -1,0 +1,10 @@
+{
+  "rewrites": [
+    { "source": "/life", "destination": "/index.html" },
+    { "source": "/age", "destination": "/index.html" },
+    { "source": "/year", "destination": "/index.html" },
+    { "source": "/yearly", "destination": "/index.html" },
+    { "source": "/goal", "destination": "/index.html" },
+    { "source": "/goals", "destination": "/index.html" }
+  ]
+}
