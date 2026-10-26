@@ -199,10 +199,45 @@ function buildSvg(cfg) {
   const text = (value, y, size, color, weight = 500) => {
     if (value === null || value === undefined || value === '') return;
     const valueText = String(value);
+    const fontSize = Math.round(size);
+
+    // Render separator glyphs as actual SVG circles, not font characters.
+    // This avoids missing-glyph boxes for middle dot (U+00B7), dot operator
+    // (U+22C5), bullet (U+2022), and bullet operator (U+2219) on minimal
+    // serverless font stacks. It is also independent of UTF-8/font fallback.
+    const separatorPattern = /[·⋅•∙]/u;
+    if (separatorPattern.test(valueText)) {
+      const segments = valueText.split(/[·⋅•∙]/u).map(part => part.trim());
+      const separatorCount = segments.length - 1;
+      const separatorSlot = Math.max(fontSize * 0.72, 8);
+      const rawWidths = segments.map(part => Math.max(fontSize * 0.12, [...part].length * fontSize * 0.54));
+      const rawTotal = rawWidths.reduce((sum, width) => sum + width, 0) + separatorCount * separatorSlot;
+      const maxTotal = Math.max(1, contentW * 0.96);
+      const fitScale = rawTotal > maxTotal ? maxTotal / rawTotal : 1;
+      const widths = rawWidths.map(width => width * fitScale);
+      const slot = separatorSlot * fitScale;
+      const totalWidth = widths.reduce((sum, width) => sum + width, 0) + separatorCount * slot;
+      let cursor = centerX - totalWidth / 2;
+      const radius = Math.max(1.3, Math.min(fontSize * 0.085, 2.5 * scale)) * fitScale;
+
+      segments.forEach((part, index) => {
+        const width = widths[index];
+        if (part) {
+          pieces.push(`<text x="${cursor.toFixed(2)}" y="${y.toFixed(2)}" fill="${color}" font-family="Roboto,sans-serif" font-size="${fontSize}" font-weight="${weight}" text-anchor="start" dominant-baseline="middle" textLength="${width.toFixed(2)}" lengthAdjust="spacingAndGlyphs">${xml(part)}</text>`);
+        }
+        cursor += width;
+        if (index < separatorCount) {
+          pieces.push(`<circle cx="${(cursor + slot / 2).toFixed(2)}" cy="${y.toFixed(2)}" r="${radius.toFixed(2)}" fill="${color}"/>`);
+          cursor += slot;
+        }
+      });
+      return;
+    }
+
     const estimatedWidth = valueText.length * size * 0.58;
     const fitAttrs = estimatedWidth > contentW * 0.96
       ? ` textLength="${Math.max(1, contentW * 0.96).toFixed(2)}" lengthAdjust="spacingAndGlyphs"` : '';
-    pieces.push(`<text x="${centerX.toFixed(2)}" y="${y.toFixed(2)}" fill="${color}" font-family="Roboto,sans-serif" font-size="${Math.round(size)}" font-weight="${weight}" text-anchor="middle" dominant-baseline="middle"${fitAttrs}>${xml(valueText)}</text>`);
+    pieces.push(`<text x="${centerX.toFixed(2)}" y="${y.toFixed(2)}" fill="${color}" font-family="Roboto,sans-serif" font-size="${fontSize}" font-weight="${weight}" text-anchor="middle" dominant-baseline="middle"${fitAttrs}>${xml(valueText)}</text>`);
   };
   if (cfg.showTitle && cfg.title) text(cfg.title, top + contentH * 0.055, titleSize, cfg.dot, 700);
   const gridTop = top + contentH * (cfg.showTitle && cfg.title ? 0.14 : 0.035);
