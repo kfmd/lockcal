@@ -32,7 +32,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "api/calendar.js": {
-      "includeFiles": "node_modules/roboto-npm-webfont/fonts/**"
+      "includeFiles": "node_modules/{roboto-npm-webfont/fonts/**,@expo-google-fonts/noto-sans-symbols-2/**,@expo-google-fonts/noto-sans-symbols/**}"
     }
   }
 }
